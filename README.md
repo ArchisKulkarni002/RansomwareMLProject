@@ -1,57 +1,89 @@
 # **RansomwareMLProject**: Ransomware Detection and Network Traffic Analysis Using Machine Learning
-*By 
+*By
 Archis K, M B Ashish, Nitin R*
 
-## Project Overview
-This project focuses on the detection and analysis of ransomware within network traffic data sourced from Android devices. With a dataset containing 84 input features and thousands of rows of traffic information, our goal is to classify network activity as either ransomware-related or benign, further categorizing the type of ransomware when present. Given the high dimensionality and complexity of network traffic data, we aim to develop insights into the unique patterns associated with ransomware and identify indicators that can support early threat detection.
+> [RansomwareMLProject Github Link](https://github.com/ArchisKulkarni002/RansomwareMLProject) (Repo might be private)
 
-In addition to classification, our analysis encompasses understanding the impact of ransomware on network performance, analyzing traffic patterns for potential Command and Control (C2) communication, and identifying significant traffic features that are indicative of ransomware. This project is structured to facilitate effective detection, streamline threat hunting for analysts, and provide an in-depth analysis of how ransomware behaves within a network.
+## 1. Abstract
+Ransomware is a form of malware that restricts access to a victim’s data until a ransom is paid, on Android devices ransomware can manifest in various forms, from locking the device to encrypting personal files, rendering them inaccessible. The increasing prevalence of Android ransomware highlights the need for effective detection methods that can identify such threats before they cause significant damage. 
 
-## Dataset Details
-Our dataset consists of network traffic data collected from Android devices, with 84 features characterizing various aspects of traffic flow, such as latency, bandwidth usage, packet size, and frequency of connections. A label column classifies each entry detailing the type of ransomware. This dataset enables us to examine network traffic attributes comprehensively and isolate patterns unique to ransomware activity.
+Ransomware, in its operation, often generates distinctive patterns of network activity. This includes communication with command and control (C2) servers for instructions or data exfiltration, as well as unusual data transfers or requests that may signal malicious behavior.
 
->[Dataset: Android Ransomware Detection](https://www.kaggle.com/datasets/subhajournal/android-ransomware-detection)
+This project focuses on examining the network traffic characteristics, such as the Flow IAT(Inter-arrival Time), duration, size, and packets/s using various Machine Learning techniques such as k-NN, Decision Tree, Random Forest, ANN/MLP so as to identify, if it is normal(benign) network pattern or classify the ransomware using the unique network signature.
 
-## Project Objectives and Tasks
-The primary objectives of this project are broken down into the following tasks, each aimed at addressing a distinct aspect of ransomware detection and network analysis:
+## 3. Dataset
 
-1. **Preprocessing and Exploratory Data Analysis (EDA)**
-   - **Goal**: Prepare the dataset for analysis by cleaning and standardizing data, conducting exploratory data analysis to identify key trends, and applying feature selection methods if necessary to improve computational efficiency.
+> [Android Ransomware Detection](https://www.kaggle.com/datasets/subhajournal/android-ransomware-detection)
 
-2. **Ransomware Classification Based on Input Data**
-   - **Goal**: Classify network traffic data as ransomware or non-ransomware, followed by the identification of specific ransomware types, thereby creating a two-step classification model for precise threat categorization.
+The dataset comprises network monitoring records of Android devices aimed at identifying ransomware types and benign traffic present in user networks. It contains a total of 392,034 rows and 85 columns. The dataset includes 10 distinct types of Android ransomware, alongside benign traffic. The ransomware types are as follows: *SVpeng, PornDroid, Koler, RansomBO, Charger, Simplocker, WannaLocker, Jisut, Lockerpin, and Pletor*.
 
-3. **Network Traffic Pattern Visualization and Dimensionality Reduction for Threat Hunting**
-   - **Goal**: Reduce the dataset’s dimensionality, retaining essential traffic patterns. Visualization techniques and dimensionality reduction (e.g., PCA) will make it easier for analysts to identify and hunt threats by simplifying complex traffic patterns.
+The distribution of data labels is summarized in the table below:
 
-4. **Impact Analysis of Ransomware on Network Performance**
-   - **Goal**: Analyze how ransomware impacts network performance by measuring factors like increased latency, bandwidth consumption, and packet loss. This analysis will quantify ransomware’s disruptive effects on network efficiency.
+| **Label**   | **Record Count** |
+| ----------- | ---------------- |
+| SVpeng      | 54,161           |
+| PornDroid   | 46,082           |
+| Koler       | 44,555           |
+| Benign      | 43,091           |
+| RansomBO    | 39,859           |
+| Charger     | 39,551           |
+| Simplocker  | 36,340           |
+| WannaLocker | 32,701           |
+| Jisut       | 25,672           |
+| Lockerpin   | 25,307           |
+| Pletor      | 4,715            |
 
-5. **Feature Importance for Ransomware Detection**
-   - **Goal**: Identify the most significant traffic features that signal ransomware activity. By determining key indicators, we can improve the speed and accuracy of ransomware detection processes.
+This dataset serves as a robust foundation for analyzing network traffic patterns and classifying various ransomware types.
 
-6. **Traffic Pattern Analysis to Identify Command and Control (C2) Communication**
-   - **Goal**: Detect suspicious traffic patterns that suggest communication with a Command and Control (C2) server. Identifying C2 communication patterns is critical for early detection of ransomware activity and can offer insights into the ransomware lifecycle.
 
-7. **Anomaly Detection for Early Ransomware Detection** *(subject to revision)*
-   - **Goal**: Implement anomaly detection techniques to identify unusual network traffic patterns that could signify emerging ransomware threats, regardless of whether they are known ransomware types.
-## Usable Models
-**Classification**
- - Naive Bayes
- - Logistic Regression
- - SVM
+## 5. Approaches
 
-**Clustering**
- - K-means/ GMM
- 
- **Regression**
- - Random Forest
- - ANN/ MLP
-## Expected Outcomes
+### 5.2 Naive Multiclass Classification
+Here is the naive section content:
+The first attempt was to make use of a decision tree classifier to predict the labels of all ransomwares using the entire dataset after encoding and preprocessing.
 
-By the end of this project, we aim to achieve the following:
+This attempt yielded extremely high accuracy figures as described in Results, but the result was dependent almost entirely on two columns, namely Flow ID and Timestamp.
 
-- **Improved Ransomware Detection**: Enhanced accuracy and efficiency in identifying ransomware traffic using a reduced feature set.
-- **Actionable Insights**: Understanding of which network traffic features are most indicative of ransomware activity.
-- **Efficient Threat Hunting**: Simplified visualization and analysis through dimensionality reduction, enabling faster and more accurate threat identification.
-- **Anomaly Detection Framework**(*subject to revision*): A framework to detect potential ransomware threats based on unusual traffic patterns, aiding in proactive cybersecurity measures.
+Relying on these two parameters causes a serious shortcoming in the analysis, which is explained in the following section.
+
+### 5.3 The Misapplication of Network Identifiers in Classification
+
+The studies have trained models using network identifiers like Timestamp, Flow ID (Source IP + Destination IP), and Source IP. Due to the way the data is captured, the Ransomware labels become linearly separable along these identifiers, leading to high accuracy (93.53% and 95.20%) when classifying ransomware using these features individually. However, when these features are excluded, the accuracy drops significantly, indicating the model hasn't learned the deeper network patterns associated with ransomware.
+
+Using Timestamp, Flow ID, and Source IP directly for classification provides limited insight into the actual traffic behavior. These identifiers offer little information about the network's content or malicious activity. Instead, classification should focus on dynamic traffic patterns, such as flow characteristics, packet sizes, and protocol behavior, which better reflect network activity and allow for more accurate, robust, and adaptable models.
+
+### 5.4 PCA Multiclass Classification
+We used the dataset, consisting of 20 standardized features derived from a larger set of 75 columns using PCA for multiclass classification with 11 label classes, including one benign class and multiple virus categories. One-hot encoding was applied to the labels. Several machine learning models were utilized, including an *Artificial Neural Network (ANN)*, *Logistic Regression* for binary classification, and a *Random Forest classifier*.
+
+### 5.5 Feature Selection Multiclass Classification
+A dataset consisting of 20 most relevant features, identified through feature selection, was utilized for direct multiclass classification. The three features with the highest variance were excluded. The selected features were cleaned, standardized, and encoded as needed. This dataset was used for direct multiclass classification. Several machine learning models were applied, including _Artificial Neural Network (ANN)_, _K-Nearest Neighbors (KNN)_, and _Random Forest_.
+
+### 5.6 Feature Selection Binary Classification
+The dataset comprising 20 most relevant features from feature selection was used. The classification involved determining whether a sample was benign or ransomware, with further classification applied for ransomware samples. Several machine learning models were employed, including _Artificial Neural Network (ANN)_, _Random Forest_, and _Decision Tree_.
+
+### 5.7 Ensemble Multiclass Classification
+Ensemble multiclass classification is a technique where individual models are constructed to perform binary classification over each ransomware class.
+
+Binary classification is done by setting label as 1 for a certain ransomware class, and 0 for all others. 0-labelled data is randomly selected to be equal in volume to 1-labelled data. This makes for 50:50 distribution of 1/0 data.
+
+Steps are as follows
+1. Encode and balance dataset for binary classification, i.e. _whether or not it belongs to the ransomware class_.
+2. Train a classifier model (in this case, random forest).
+3. Repeat step 1 and 2 for 11 all ransomware classes, including benign.
+4. Save the row-wise prediction data of each model in a separate column. Concatenate the actual label too.
+5. Use the new prediction data for multiclass classification.
+
+## Conclusion
+The dataset used in this study contains a total of 85 features, with `Source IP`, `Flow ID`, and `Timestamp` accounting for a significant portion of the variance. However, these features are not suitable for determining ransomware labels due to their nature as metadata. **They are not directly relevant to the network traffic characteristics, lack generalizability, and are subject to frequent changes, making them unreliable indicators for classification.**
+
+Excluding these features leaves the remaining usable features with insufficient variance to effectively distinguish between different types of ransomware. Consequently, the models trained on this dataset fail to achieve high classification accuracy for ransomware detection and type determination.
+
+Interestingly, the high accuracy results observed in some studies cited in the literature review can be attributed to the inclusion of one or more of these metadata features. While such an approach may yield impressive results, it does not provide a robust or generalizable solution for ransomware detection, as these features cannot reliably capture the intrinsic patterns of network traffic associated with ransomware activity.
+
+This highlights a key challenge in developing accurate and scalable models for ransomware detection: the need for meaningful feature engineering and the identification of traffic-specific features that can better represent the underlying patterns without relying on volatile metadata.
+
+## References
+1. Bergsma, Wicher (2013). "A bias correction for Cramér's V and Tschuprow's T". Journal of the Korean Statistical Society. 42 (3): 323–328. doi:10.1016/j.jkss.2012.10.002.
+2. https://online.stat.psu.edu/stat200/book/export/html/230
+2. G. Saporta, Simultaneous Analysis of Qualitative and Quantitative Data (1990), Societa Italiana di Statistica. XXXV riunione scientifica, Padova, Italy. pp.62–72. Ffhal-02513970f.
+3. J. Pagès, Analyse factorielle de données mixtes (2004), Revue de statistique appliquée, tome 52, no 4 (2004), p. 93–111
